@@ -37,8 +37,6 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-      def download
-        Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
 	def download
   Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
   
@@ -64,19 +62,6 @@ module Jekyll
 rescue *NET_HTTP_ERRORS => e
   raise DownloadError, e.message
 end
-          http.request(request) do |response|
-            raise_unless_sucess(response)
-            enforce_max_file_size(response.content_length)
-            response.read_body do |chunk|
-              zip_file.write chunk
-            end
-          end
-        end
-        @downloaded = true
-      rescue *NET_HTTP_ERRORS => e
-        raise DownloadError, e.message
-      end
-
       def request
         return @request if defined? @request
 
