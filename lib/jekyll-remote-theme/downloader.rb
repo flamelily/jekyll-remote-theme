@@ -39,7 +39,7 @@ module Jekyll
 
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        Net::HTTP.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
+Net::HTTP.start(zip_url.host, zip_url.port, :use_ssl => true, :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
           http.request(request) do |response|
             raise_unless_sucess(response)
             enforce_max_file_size(response.content_length)
