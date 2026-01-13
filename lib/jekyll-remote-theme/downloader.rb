@@ -37,17 +37,12 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-	def download
+def download
   Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
   
   http = Net::HTTP.new(zip_url.host, zip_url.port)
-  http.use_ssl = true
-  http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-  
-  # Skip CRL checks which cause issues with Ruby 3.4+
-  if http.respond_to?(:crl_check_depth=)
-    http.crl_check_depth = 0
-  end
+  http.use_ssl = (zip_url.scheme == 'https')
+  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   
   http.start do |connection|
     connection.request(request) do |response|
