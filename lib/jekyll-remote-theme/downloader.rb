@@ -37,26 +37,23 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-def download
+      def download
   Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
   
-  http = Net::HTTP.new(zip_url.host, zip_url.port)
-  http.use_ssl = (zip_url.scheme == 'https')
-  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  
-  http.start do |connection|
-    connection.request(request) do |response|
+  uri = zip_url
+  Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+    http.request(request) do |response|
       raise_unless_sucess(response)
       enforce_max_file_size(response.content_length)
       response.read_body do |chunk|
         zip_file.write chunk
+        end
       end
     end
-  end
-  @downloaded = true
-rescue *NET_HTTP_ERRORS => e
-  raise DownloadError, e.message
-end
+      @downloaded = true
+      rescue *NET_HTTP_ERRORS => e
+      raise DownloadError, e.message
+    end
       def request
         return @request if defined? @request
 
